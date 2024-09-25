@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.dongx"
-version = "1.0.0"
+version = "1.0.3"
 
 repositories {
   maven { url 'https://maven.aliyun.com/repository/central/'}
@@ -34,5 +34,5 @@ tasks.withType(JavaCompile) {
 patchPluginXml {
   //注意这个版本号不能高于上面intellij的version,否则runIde会报错
   sinceBuild = '222'
-  untilBuild = '232.*'
+  untilBuild = '242.*'
 }

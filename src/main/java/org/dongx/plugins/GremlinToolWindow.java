@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.RequestOptions;
+import org.apache.tinkerpop.gremlin.driver.Result;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -79,11 +80,15 @@ public class GremlinToolWindow {
                         client = GremlinClient.init(host, Integer.parseInt(port), username, password);
                     }
 
+                    String queryTime = LocalDateTime.now().format(formatter);
                     if (client != null) {
                         // 执行 SQL 查询
-                        String result = "查询失败";
+                        String result = "查询无结果";
                         try {
-                            result = client.submit(query, RequestOptions.build().timeout(60000000L).create()).all().get().get(0).getString();
+                            List<Result> results = client.submit(query, RequestOptions.build().timeout(60000000L).create()).all().get();
+                            if (!results.isEmpty()) {
+                                result = results.get(0).getString();
+                            }
                         } catch (InterruptedException | ExecutionException ex) {
                            result = ex.getLocalizedMessage();
                         }
@@ -93,7 +98,8 @@ public class GremlinToolWindow {
                         SwingUtilities.invokeLater(() -> {
                             // 显示结果
                             // 将结果输出到控制台
-                            consoleView.print(LocalDateTime.now().format(formatter) + ":  " + finalResult + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+                            consoleView.print(queryTime + "(query)" + ": " + query + "\n"
+                                    + LocalDateTime.now().format(formatter) + "(result)" + ": " + finalResult + "\n\n", ConsoleViewContentType.NORMAL_OUTPUT);
 
                             // 保存 SQL 到历史记录中，并重置索引
                             if (!query.trim().isEmpty()) {
